@@ -14,72 +14,6 @@
 
 use std::time::{Instant, Duration};
 
-fn print_02(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;2]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_03(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;3]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_04(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;4]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_05(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;5]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_06(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;6]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_07(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;7]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-/*
-fn print_08(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;8]) {
-    let dt: Duration = now.elapsed();
-    println!("");
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-fn print_09(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;9]) {
-    println!("");
-    let dt: Duration = now.elapsed();
-    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
-    println!("{:?}", ary);
-    println!("{0} / {1}", icount, iouterloop - 1); 
-    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
-}
-*/
 // loop to verify 12 is of density 1/2
 fn calc_verify_01() {
     let now: Instant = Instant::now();
@@ -1814,6 +1748,72 @@ fn calc_verify_102() {
     }
     print_07(now, icount, iouterloop, &ary);
 }
+fn print_02(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;2]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_03(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;3]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_04(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;4]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_05(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;5]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_06(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;6]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_07(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;7]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+/*
+fn print_08(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;8]) {
+    let dt: Duration = now.elapsed();
+    println!("");
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+fn print_09(now: Instant, icount: i64, iouterloop: i64, ary: &[i64;9]) {
+    println!("");
+    let dt: Duration = now.elapsed();
+    println!("after {} minutes", (dt.as_secs() as f64) / (60.0 as f64)); 
+    println!("{:?}", ary);
+    println!("{0} / {1}", icount, iouterloop - 1); 
+    println!("{}", (icount as f64) / ((iouterloop - 1) as f64));
+}
+*/
 
 fn main() {
     calc_verify_01();
