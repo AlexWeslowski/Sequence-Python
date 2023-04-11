@@ -177,9 +177,9 @@ def main():
     imult = 32
     numcores = int(args[0])
     i0, i1 = int(args[1]) - numcores * imult, int(args[2])
+    if i0 > 12:
+        i0 = 12
     print(f"starting process with numcores={numcores}, istart={i0}, ifinish={i1}")
-    # numcores, i0, i1 = 2, 517310, 10**6
-    # numcores, i0, i1 = 2, 1248245, 10**7
     i, t0 = i0, time.time()
     while i < i1:
         i += numcores * imult
