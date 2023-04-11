@@ -4,7 +4,7 @@ from multiprocessing import Process
 # 2**28 ~ 10**8.43
 # 2**33 ~ 10**9.93
 setprimes = frozenset(primesieve.primes(2**28))
-setfractions = frozenset([Fraction(1, 2), Fraction(1, 3)])
+setfractions = frozenset([Fraction(1, 2),])
 
 @functools.cache
 def gcd(tpl):
@@ -120,7 +120,6 @@ def factorCombinations(n):
     return combinations
 
 
-# ary_tpl = factorizations_inner(549120)
 def factorizations_outer(n, iminlen=3, imaxlen=10):
     ary_tpl = factorCombinations(n)
     at = -1
@@ -159,13 +158,11 @@ def factors_loop(t0, i0, i1, i2, bbreak):
             print(f"{round(dt, 2)} minutes ~ {round((i - i0)/dt, 1)} per min")
         if i in setprimes or i/2 in setprimes or i/3 in setprimes:
             continue
-        # fact1 = frozenset([tuple(ary) for ary in factorizations_outer(549120, 4)])
-        # fact1 = frozenset([tuple(ary) for ary in factorizations_outer(i, 4)])
         fact1 = frozenset([tuple(ary) for ary in factorizations_outer(i)])
         for f1 in fact1:
             frac1 = calc_density(i, f1)
             if frac1 in setfractions:
-                print(f"{f1} {i} {lcm2(f1)} {frac1}")
+                print(f"{f1} {i} {frac1}")
                 if bbreak:
                     break
     
