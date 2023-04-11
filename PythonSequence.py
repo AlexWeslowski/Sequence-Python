@@ -92,7 +92,7 @@ def calc_density(i, a):
 def backtrack(start, target, factors, combinations, n):
     if target == 1:
         # Add a copy of the factors list to combinations, except if the list contains only one factor equal to n
-        if (len(factors) >= 4 and len(factors) <= 9) and (factors[0] != n and factors[0] != 2):
+        if (len(factors) >= 4 and len(factors) <= 10) and (factors[0] != n and factors[0] != 2):
             bappend = True
             for j in range(len(factors) - 1, 0, -1):
                 for k in range(j - 1, -1, -1):
