@@ -895,10 +895,10 @@ def factors_loop(q_in, q_out, bbreak):
         if tpl is None:
             q_out.put(None)
             break
-        if False and ((tpl[0] <= 39443712 and tpl[1] >= 39443712) or (tpl[0] <= 39621120 and tpl[1] >= 39621120)):
-            verbose = True
-        else:
-            verbose = False
+        #if False and ((tpl[0] <= 39443712 and tpl[1] >= 39443712) or (tpl[0] <= 39621120 and tpl[1] >= 39621120)):
+        #    verbose = True
+        #else:
+        #    verbose = False
         if verbose: print(f"factors_loop() tpl = {tpl}")
         if verbose: print(f"factors_loop() setfractions = {[str(x.numerator) + "/" + str(x.denominator) for x in list(setfractions)]}")
         if not bstarted:
@@ -1177,10 +1177,10 @@ def writer(q_out):
                     print(f"writer() icompleted = {icompleted}, inumthreads = {inumthreads}")
                     dt = (time.time() - t0)/60
                     total_writer += (time.time() - twriter)
-                    print(f"{round(dt, 2)} minutes ~ {round(itotal/dt, 1)} per min")
+                    print(f"{round(dt, 2)} minutes ~ {round((i1 - i0)/dt, 1)} per min")
                     break
                 else:
-                    print(f"writer() fact2 is None")
+                    if verbose: print(f"writer() fact2 is None")
                     continue
             if i0 == 0:
                 #print(f"i0 = {i0}, fact2 = {fact2}")
@@ -1308,10 +1308,10 @@ def writer(q_out):
         dt = (time.time() - t0)/60
         print(f"icompleted = {icompleted}")
         print(f"inumthreads = {inumthreads}")
-        print(f"bzip = {bzip}")
-        print(f"bfile = {bfile}")
-        print(f"bfileclosed = {bfileclosed}")
         if verbose:
+            print(f"bzip = {bzip}")
+            print(f"bfile = {bfile}")
+            print(f"bfileclosed = {bfileclosed}")
             print(f"line = {sys._getframe(0).f_lineno}, ifacts = {ifacts}")
             print(f"line = {sys._getframe(0).f_lineno}, len(facts) = {len(facts)}")
             print(f"line = {sys._getframe(0).f_lineno}, ilines = {ilines}")
@@ -1393,13 +1393,13 @@ def directory_path():
     global bfile
     
     hsh_dir = {}
-    hsh_dir[(1, 'current', 'Current Working Directory')] = os.getcwd()
-    hsh_dir[(2, 'module', 'Python Module Directory')] = pathlib.Path(__file__).parent.resolve()
-    hsh_dir[(3, 'home', 'Home Directory')] = os.path.expanduser('~')
-    hsh_dir[(4, 'data', 'Data Directory')] = platformdirs.user_data_dir()
-    hsh_dir[(5, 'documents', 'Documents Directory')] = platformdirs.user_documents_dir()
+    hsh_dir[(1, 'current',   'Current Working Directory ...')] = os.getcwd()
+    hsh_dir[(2, 'module',    'Python Module Directory .....')] = pathlib.Path(__file__).parent.resolve()
+    hsh_dir[(3, 'home',      'Home Directory ..............')] = os.path.expanduser('~')
+    hsh_dir[(4, 'data',      'Data Directory ..............')] = platformdirs.user_data_dir()
+    hsh_dir[(5, 'documents', 'Documents Directory .........')] = platformdirs.user_documents_dir()
     
-    print("Choose a directory to store program output:")
+    print("Choose a directory to write file to:")
     for key, value in hsh_dir.items():
         print(f"[{key[0]}] {key[2]} {value}")
     print("[6] Custom Path")
@@ -1446,11 +1446,11 @@ bln_keyboard_interrupt = False
 # 
 # main loop 
 # 
-#   8,388,608 # 139.36 mins (2.32 hrs)
+#   8,388,608 # 139.4 mins (2.3 hrs) # 1021.6 mins (17.0 hrs) ~ 7923.7 per min
 # 268,380,000
 # 
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 65536
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 8 2 2 8388608
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
@@ -1473,7 +1473,6 @@ def main():
     global bln_writer
     global bln_keyboard_interrupt
     
-    verbose = False
     print(sys.version)
     print("")
     args = sys.argv[1:]
@@ -1490,15 +1489,16 @@ def main():
     imult = 8192
     istarted = 0
     inumthreads = int(args[0])
-    idenominator = int(args[1])
-    setfractions = frozenset([Fraction(1, idenominator),])
-    filename = f"sequence 1_{idenominator}.txt"
+    ary = eval(args[1])
+    strary = str(ary)[1:-1].replace("),(", ") (").replace(", ", ",")
+    setfractions = frozenset([Fraction(tpl[0], tpl[1]) for tpl in ary])
+    filename = f"sequence {strary}.txt"
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
     if i1 > 2**16:
         fill_primes(i1 + 2)
     if i0 < 2:
         i0 = 2
-    print(f"main() starting process with inumthreads={inumthreads}, denominator={idenominator}, istart={i0}, ifinish={i1}")
+    print(f"main() starting process with inumthreads={inumthreads}, setfractions={ary}, istart={i0}, ifinish={i1}")
     
     # inumthreads, i0, i1 = 2, 2, 32768
     # i, imult = i0, 8192
@@ -1512,8 +1512,9 @@ def main():
         if i > 12:
             fill_hsh(i)
         
-        if i0 <= idenominator:
-            q_out.put([(idenominator, Fraction(1, idenominator), idenominator, [idenominator,]),])
+        for frac in setfractions:
+            if i0 <= frac.denominator:
+                q_out.put([(frac.denominator, Fraction(1, frac.denominator), frac.denominator, [frac.denominator,]),])
         
         th = [object(),] * inumthreads
         while i < i1:
