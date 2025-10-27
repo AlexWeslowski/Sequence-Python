@@ -9,9 +9,11 @@ def install_packages(package_list):
                 spec = importlib.util.find_spec(package_name)
                 if spec is None:
                     raise ImportError(f"Package installed but module '{package_name}' is not found.")
-            if not is_git:
+            if is_git:
+                _ = __import__(package_name[package_name.rfind("/")+1:package_name.rfind(".")].lower())
+            else:
                 _ = __import__(package_name)
-                #eval(f"{package_name} = __import__('{package_name}')")
+            #eval(f"{package_name} = __import__('{package_name}')")
         except ImportError as ie:
             try:
                 #pip.main(['install', package_name])
@@ -1446,14 +1448,16 @@ bln_keyboard_interrupt = False
 # 
 # main loop 
 # 
-#   8,388,608 # 139.4 mins (2.3 hrs) # 1021.6 mins (17.0 hrs) ~ 7923.7 per min
+#   1,048,576 #  4.54 mins (0.1 hrs) ~ 210,133 per min
+#   8,388,608 # 48.03 mins (0.8 hrs) ~ 168,542 per min
 # 268,380,000
 # 
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 [(1,2)] 2 65536
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 1 [(1,2)] 2 1048576
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 8 [(1,2)] 2 8388608
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 2 39410944 39653888
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 2 8388608 16777216
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 2 2 268380000
 # 
 def main():
     global verbose
@@ -1569,4 +1573,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
