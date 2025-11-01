@@ -5,22 +5,27 @@ def install_packages(package_list):
     for package_name in package_list:
         try:
             is_git = package_name.startswith("git+") or package_name.find("https://") > 0
+            is_py = package_name.startswith("py-")
             if False:
                 spec = importlib.util.find_spec(package_name)
                 if spec is None:
                     raise ImportError(f"Package installed but module '{package_name}' is not found.")
-            if is_git:
-                _ = __import__(package_name[package_name.rfind("/")+1:package_name.rfind(".")].lower())
-            else:
-                _ = __import__(package_name)
-            #eval(f"{package_name} = __import__('{package_name}')")
-        except ImportError as ie:
+            if not is_git:
+                if is_py:
+                    _ = __import__(package_name[3:])
+                else:
+                    _ = __import__(package_name)
+                #eval(f"{package_name} = __import__('{package_name}')")
+        except (ModuleNotFoundError, ImportError) as ex:
             try:
                 #pip.main(['install', package_name])
                 process = subprocess.run([sys.executable, "-m", "pip", "install", package_name], check=True, capture_output=True, text=True)
                 print(process.stdout)
                 if not is_git:
-                    _ = __import__(package_name)
+                    if is_py:
+                        _ = __import__(package_name[3:])
+                    else:
+                        _ = __import__(package_name)
             except subprocess.CalledProcessError as cpe:
                 print(f"Exit Code: {cpe.returncode}")
                 print("[STDOUT]")
@@ -33,11 +38,11 @@ def install_packages(package_list):
                 pass
             pass
 
-package_list = "multiprocessing, math, numpy, numba, sympy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback".split(", ")
+package_list = "multiprocessing, math, numpy, numba, sympy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, py-cpuinfo".split(", ")
 package_list.append("git+https://github.com/AlexWeslowski/Divisors.git")
 install_packages(package_list)
 
-import multiprocessing, math, numpy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback
+import multiprocessing, math, numpy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, cpuinfo
 import numba, numba.experimental, numba.extending, numba.typed, numba.types
 import sympy, sympy.external.gmpy
 from multiprocessing import Process
@@ -1307,7 +1312,7 @@ def writer(q_out):
         print(traceback.format_exc())
         pass
     finally:
-        dt = (time.time() - t0)/60
+        dt = time.time() - t0
         print(f"icompleted = {icompleted}")
         print(f"inumthreads = {inumthreads}")
         if verbose:
@@ -1345,17 +1350,17 @@ def writer(q_out):
                     conn.commit()
                     conn.close()
                     total_data += (time.time() - tdata)
-            print(f"# {round(total_factor_combinations/60, 2)} total minutes factorCombinations()")
-            print(f"# {round(total_factorizations_outer/60, 2)} total minutes factorizations_outer()")
-            print(f"# {round(total_calc_density/60, 2)} total minutes calc_density()")
-            print(f"# {round(total_writer/60, 2)} total minutes writer()")
+            print(f"# {round(total_factor_combinations/60, 2):.2f} total minutes ({100.0*total_factor_combinations/dt:.2f}%) factorCombinations()")
+            print(f"# {round(total_factorizations_outer/60, 2):.2f} total minutes ({100.0*total_factorizations_outer/dt:.2f}%) factorizations_outer()")
+            print(f"# {round(total_calc_density/60, 2):.2f} total minutes ({100.0*total_calc_density/dt:.2f}%) calc_density()")
+            print(f"# {round(total_writer/60, 2):.2f} total minutes ({100.0*total_writer/dt:.2f}%) writer()")
             print(f"# {round(total_file, 2)} total seconds writing to file")
             print(f"# {round(total_data, 2)} total seconds writing to database")
             #print(f"# i0 = {i0}")
             #print(f"# i1 = {i1}")
             #print(f"# i1 - i0 = {i1 - i0}")
-            print(f"# itotal = {itotal} ~ {round(itotal/dt, 1)} per min")
-            print(f"# {round(dt, 2)} mins ({round(dt/60, 2)} hrs) ~ {round((i1 - i0)/dt, 1)} per min")
+            print(f"# itotal = {itotal} ~ {round(itotal/(dt/60), 1)} per min")
+            print(f"# {round(dt/60, 2)} mins ({round(dt/60/60, 2)} hrs) ~ {round((i1 - i0)/(dt/60), 1)} per min")
 
 
 t0 = 0
@@ -1448,16 +1453,16 @@ bln_keyboard_interrupt = False
 # 
 # main loop 
 # 
-#   1,048,576 #  4.54 mins (0.1 hrs) ~ 210,133 per min
-#   8,388,608 # 48.03 mins (0.8 hrs) ~ 168,542 per min
+#   8,388,608 # 139.4 mins (2.3 hrs) # 1021.6 mins (17.0 hrs) ~ 7923.7 per min
 # 268,380,000
 # 
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 [(1,2)] 2 65536
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 1 [(1,2)] 2 1048576
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 8 [(1,2)] 2 8388608
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 2 39410944 39653888
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 2 8388608 16777216
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 4 2 2 268380000
+# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 2 [(1,2)] 2 65536
+# 
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
 # 
 def main():
     global verbose
@@ -1478,6 +1483,9 @@ def main():
     global bln_keyboard_interrupt
     
     print(sys.version)
+    cpu_info = cpuinfo.get_cpu_info()
+    processor_name = cpu_info.get('brand_raw', 'Unknown Processor')
+    print(processor_name)
     print("")
     args = sys.argv[1:]
     directory = directory_path()
@@ -1573,3 +1581,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
