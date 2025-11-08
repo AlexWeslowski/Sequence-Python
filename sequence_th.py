@@ -1181,7 +1181,7 @@ def writer(q_out):
             if fact2 is None:
                 icompleted += 1
                 if icompleted == inumthreads:
-                    print(f"writer() icompleted = {icompleted}, inumthreads = {inumthreads}")
+                    #print(f"writer() icompleted = {icompleted}, inumthreads = {inumthreads}")
                     dt = (time.time() - t0)/60
                     total_writer += (time.time() - twriter)
                     print(f"{round(dt, 2)} minutes ~ {round((i1 - i0)/dt, 1)} per min")
@@ -1209,7 +1209,7 @@ def writer(q_out):
                 for f2 in sfacts[:factscache//2]:
                     print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
                     if bfile:
-                        lines.append(f"{f2[1]}\t{f2[2]}\t{f2[3]}\t{len(f2[3])}\n")
+                        lines.append(f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n")
                     if bdata:
                         # data.append((f2[1].numerator, f2[1].denominator, f2[2], str(f2[3]), len(f2[3])))
                         _ = curs.execute("INSERT INTO sequence (num, den, ord, len) VALUES (?, ?, ?, ?);", (f2[1].numerator, f2[1].denominator, f2[2], len(f2[3])))
@@ -1283,7 +1283,7 @@ def writer(q_out):
                     if len(facts) > 0:
                         for f2 in sorted(facts, key=lambda x: x[2]):
                             print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
-                            s = f"{f2[1]}\t{f2[2]}\t{f2[3]}\t{len(f2[3])}\n"
+                            s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
                             if s not in lines:
                                 lines.append(s)
                     if ilines > 0:
@@ -1313,9 +1313,9 @@ def writer(q_out):
         pass
     finally:
         dt = time.time() - t0
-        print(f"icompleted = {icompleted}")
-        print(f"inumthreads = {inumthreads}")
         if verbose:
+            print(f"icompleted = {icompleted}")
+            print(f"inumthreads = {inumthreads}")
             print(f"bzip = {bzip}")
             print(f"bfile = {bfile}")
             print(f"bfileclosed = {bfileclosed}")
@@ -1330,7 +1330,7 @@ def writer(q_out):
                     if len(facts) > 0:
                         for f2 in sorted(facts, key=lambda x: x[2]):
                             print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
-                            s = f"{f2[1]}\t{f2[2]}\t{f2[3]}\t{len(f2[3])}\n"
+                            s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
                             if s not in lines:
                                 lines.append(s)
                     if ilines > 0:
@@ -1350,12 +1350,17 @@ def writer(q_out):
                     conn.commit()
                     conn.close()
                     total_data += (time.time() - tdata)
+            process = psutil.Process(os.getpid())
+            memory_mb = round(process.memory_info().rss / 1024 / 1024, 2)
+            virtual_mb = round(process.memory_info().vms / 1024 / 1024, 2)
+            print(f"# {memory_mb:.2f} MB physical memory")
+            print(f"# {virtual_mb:.2f} MB virtual memory")
             print(f"# {round(total_factor_combinations/60, 2):.2f} total minutes ({100.0*total_factor_combinations/dt:.2f}%) factorCombinations()")
             print(f"# {round(total_factorizations_outer/60, 2):.2f} total minutes ({100.0*total_factorizations_outer/dt:.2f}%) factorizations_outer()")
             print(f"# {round(total_calc_density/60, 2):.2f} total minutes ({100.0*total_calc_density/dt:.2f}%) calc_density()")
             print(f"# {round(total_writer/60, 2):.2f} total minutes ({100.0*total_writer/dt:.2f}%) writer()")
-            print(f"# {round(total_file, 2)} total seconds writing to file")
-            print(f"# {round(total_data, 2)} total seconds writing to database")
+            print(f"# {round(total_file, 2):.2f} total seconds writing to file")
+            print(f"# {round(total_data, 2):.2f} total seconds writing to database")
             #print(f"# i0 = {i0}")
             #print(f"# i1 = {i1}")
             #print(f"# i1 - i0 = {i1 - i0}")
@@ -1453,13 +1458,14 @@ bln_keyboard_interrupt = False
 # 
 # main loop 
 # 
-#   8,388,608 # 139.4 mins (2.3 hrs) # 1021.6 mins (17.0 hrs) ~ 7923.7 per min
-# 268,380,000
+# i7-1165G7 @ 2.80GHz #   8,388,608 
+#                         8,388,608 # 139.4 mins (2.3 hrs)
+#                       268,380,000
 # 
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 2 [(1,2)] 2 65536
 # 
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
+# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
@@ -1481,6 +1487,8 @@ def main():
     global bln_all_factors_loop
     global bln_writer
     global bln_keyboard_interrupt
+    global factscache
+    global linescache
     
     print(sys.version)
     cpu_info = cpuinfo.get_cpu_info()
@@ -1501,6 +1509,9 @@ def main():
     imult = 8192
     istarted = 0
     inumthreads = int(args[0])
+    if inumthreads == 1:
+        factscache = 2
+        linescache = 4
     ary = eval(args[1])
     strary = str(ary)[1:-1].replace("),(", ") (").replace(", ", ",")
     setfractions = frozenset([Fraction(tpl[0], tpl[1]) for tpl in ary])
