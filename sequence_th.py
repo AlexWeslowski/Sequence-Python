@@ -1466,6 +1466,7 @@ bln_keyboard_interrupt = False
 # 
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 [(1,2)] 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
@@ -1592,4 +1593,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
