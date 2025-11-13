@@ -1,48 +1,92 @@
 import subprocess
 import sys
+import re
+import os
 
-def install_packages(package_list):
-    for package_name in package_list:
-        try:
-            is_git = package_name.startswith("git+") or package_name.find("https://") > 0
-            is_py = package_name.startswith("py-")
-            if False:
-                spec = importlib.util.find_spec(package_name)
-                if spec is None:
-                    raise ImportError(f"Package installed but module '{package_name}' is not found.")
-            if not is_git:
-                if is_py:
-                    _ = __import__(package_name[3:])
-                else:
-                    _ = __import__(package_name)
-                #eval(f"{package_name} = __import__('{package_name}')")
-        except (ModuleNotFoundError, ImportError) as ex:
+
+class Packages:
+    def __init__(self):        
+        self.package_list = set()
+        print(os.path.abspath(__file__))
+        with open(os.path.abspath(__file__), 'r') as f:
+            block_comment = False
+            for line in f:
+                if line.startswith("\"\"\""):
+                    block_comment = not block_comment
+                if not line.startswith("#") and not block_comment:
+                    if line.startswith("import "):
+                        self.add(line[7:])
+                    elif line.startswith("from "):
+                        self.add(line[5:])
+        self.package_hash = {}
+        self.package_hash["cpuinfo"] = "py-cpuinfo"
+        
+    def add(self, module):
+        if module.find(",") > 0:
+            for m in module.split(","):
+                self.add(m)
+            return
+        if module.find(".") > 0:
+            module = module.split(".")[0].strip()
+        elif module.find(" as ") > 0:
+            module = module.split(" as ")[0].strip()
+        elif module.find(" import ") > 0:
+            module = module.split(" import ")[0].strip()
+        else:
+            module = module.strip()
+        self.package_list.add(module)
+    
+    def append(self, package_name):
+        self.add(package_name)
+    
+    def map(self, package_name, dist_name):
+        self.package_hash[package_name] = dist_name
+    
+    def install(self):
+        print(self.package_list)
+        for package_name in self.package_list:
             try:
-                #pip.main(['install', package_name])
-                process = subprocess.run([sys.executable, "-m", "pip", "install", package_name], check=True, capture_output=True, text=True)
-                print(process.stdout)
-                if not is_git:
-                    if is_py:
-                        _ = __import__(package_name[3:])
-                    else:
-                        _ = __import__(package_name)
-            except subprocess.CalledProcessError as cpe:
-                print(f"Exit Code: {cpe.returncode}")
-                print("[STDOUT]")
-                print(cpe.stdout) 
-                print("[STDERR]")
-                print(cpe.stderr) 
+                #is_git = package_name.startswith("git+") or package_name.find("https://") > 0
+                if False:
+                    spec = importlib.util.find_spec(package_name)
+                    if spec is None:
+                        raise ImportError(f"Package installed but module '{package_name}' is not found.")
+                #if not is_git:
+                _ = __import__(package_name)
+                #eval(f"{package_name} = __import__('{package_name}')")
+            except (ModuleNotFoundError, ImportError) as ex:
+                try:
+                    #pip.main(['install', package_name])
+                    install_name = package_name
+                    if install_name in self.package_hash:
+                        install_name = self.package_hash[install_name]
+                    process = subprocess.run([sys.executable, "-m", "pip", "install", install_name], check=True, capture_output=True, text=True)
+                    print(process.stdout)
+                    #if not is_git:
+                    _ = __import__(package_name)
+                except subprocess.CalledProcessError as cpe:
+                    print(f"Exit Code: {cpe.returncode}")
+                    print("[STDOUT]")
+                    print(cpe.stdout) 
+                    print("[STDERR]")
+                    print(cpe.stderr) 
+                    pass
+                except FileNotFoundError as fnfe:
+                    print("\nError: pip command or python executable was not found.")
+                    pass
                 pass
-            except FileNotFoundError as fnfe:
-                print("\nError: pip command or python executable was not found.")
-                pass
-            pass
 
-package_list = "multiprocessing, math, numpy, numba, sympy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, py-cpuinfo".split(", ")
-package_list.append("git+https://github.com/AlexWeslowski/Divisors.git")
-install_packages(package_list)
 
-import multiprocessing, math, numpy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, cpuinfo
+p = Packages()
+#package_list = "multiprocessing, math, numpy, numba, sympy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, datetime, py-cpuinfo".split(", ")
+#p.add("git+https://github.com/AlexWeslowski/Divisors.git")
+p.map("divisors", "git+https://github.com/AlexWeslowski/Divisors.git")
+#p.install()
+#print(f"package_list, len = {len(p.package_list)}")
+#print(p.package_list)
+
+
+import multiprocessing, math, numpy, sparse, itertools, functools, operator, primefac, bitarray, numbers, operator, fractions, random, sqlite3, filelock, io, gzip, threading, queue, time, psutil, os, pathlib, platformdirs, traceback, datetime, cpuinfo
 import numba, numba.experimental, numba.extending, numba.typed, numba.types
 import sympy, sympy.external.gmpy
 from multiprocessing import Process
@@ -86,8 +130,8 @@ fill_primes(ap)
 
 
 spec = [
-    ('numerator', numba.int64),
-    ('denominator', numba.int64)
+    ('numerator', numba.types.int64),
+    ('denominator', numba.types.int64),
 ]
 
 @numba.experimental.jitclass(spec)
@@ -310,8 +354,9 @@ import threading
 import platformdirs
 import pathlib
 import importlib
+sys.path.append('H:\\Documents\\Python\\Sequence\\github')
 sys.path.append('C:\\Users\\alex.weslowski\\Documents\\Python\\Sequence\\github')
-import sequence_threads as seq
+import sequence_th as seq
 from sequence_threads import Int128
 import divisors as div
 import time
@@ -1062,6 +1107,8 @@ def fill_hsh(i):
     global maxhshkeys
     global lock
     global directory
+    if not bdata:
+        return
     with lock:
         if not os.path.exists(f"{directory}\\sequence.bin"):
             return
@@ -1163,9 +1210,8 @@ def writer(q_out):
         
         i0, i1, itotal, ifacts, ilines, iwrites, icompleted = 0, 0, 0, 0, 0, 0, 0
         if verbose:
-            print(f"writer() bfile = {bfile}")
-            print(f"writer() bzip = {bzip}")
-            print(f"writer() bdata = {bdata}")
+            print(f"writer() bfile = {bfile}, bzip = {bzip}, bdata = {bdata}")
+            print(f"writer() factscache = {factscache}, linescache = {linescache}, writescache = {writescache}")
             print(f"writer() directory = {directory}, filename = {filename}")
             print(f"writer() inumthreads = {inumthreads}, icompleted = {icompleted}")
         while bln_writer:
@@ -1184,7 +1230,7 @@ def writer(q_out):
                     #print(f"writer() icompleted = {icompleted}, inumthreads = {inumthreads}")
                     dt = (time.time() - t0)/60
                     total_writer += (time.time() - twriter)
-                    print(f"{round(dt, 2)} minutes ~ {round((i1 - i0)/dt, 1)} per min")
+                    print(f"{round(dt, 2)} minutes ~ {int(round((i1 - i0)/dt, 0)):,} per min")
                     break
                 else:
                     if verbose: print(f"writer() fact2 is None")
@@ -1267,7 +1313,7 @@ def writer(q_out):
                     #print(f"# i1 = {i1}")
                     #print(f"# i1 - i0 = {i1 - i0}")
                     print(f"# itotal = {itotal} ~ {round(itotal/dt, 1):.1f} per min")
-                    print(f"# {round(dt, 2):.2f} mins ({round(dt/60, 2):.2f} hrs) ~ {round((i1 - i0)/dt, 1):.1f} per min")
+                    print(f"# {round(dt, 2):.2f} mins ({round(dt/60, 2):.2f} hrs) ~ {int(round((i1 - i0)/dt, 0)):,} per min")
             else:
                 total_writer += (time.time() - twriter)
             q_out.task_done()
@@ -1364,7 +1410,7 @@ def writer(q_out):
             #print(f"# i0 = {i0}")
             #print(f"# i1 = {i1}")
             #print(f"# i1 - i0 = {i1 - i0}")
-            print(f"# itotal = {itotal} ~ {round(itotal/(dt/60), 1)} per min")
+            print(f"# itotal = {itotal} ~ {int(round(itotal/(dt/60), 0)):,} per min")
             print(f"# {round(dt/60, 2)} mins ({round(dt/60/60, 2)} hrs) ~ {round((i1 - i0)/(dt/60), 1)} per min")
 
 
@@ -1458,11 +1504,14 @@ bln_keyboard_interrupt = False
 # 
 # main loop 
 # 
+# i7-1165G7 @ 2.80GHz #   1,145,760 #  14.22 mins (0.24 hrs) 67,117 per min
 # i7-1165G7 @ 2.80GHz #   8,388,608 
-#                         8,388,608 # 139.4 mins (2.3 hrs)
+#                         8,388,608 # 139.40 mins (2.30 hrs)
 #                       268,380,000
 # 
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 2 [(1,2)] 2 65536
+# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 1145760 8388608
+# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 6990720 16777216
 # 
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
@@ -1495,6 +1544,7 @@ def main():
     cpu_info = cpuinfo.get_cpu_info()
     processor_name = cpu_info.get('brand_raw', 'Unknown Processor')
     print(processor_name)
+    print(datetime.datetime.now().strftime("%I:%M:%S %p"))
     print("")
     args = sys.argv[1:]
     directory = directory_path()
@@ -1518,10 +1568,14 @@ def main():
     setfractions = frozenset([Fraction(tpl[0], tpl[1]) for tpl in ary])
     filename = f"sequence {strary}.txt"
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
+    if i1 > 2**30:
+        print(f"main() this code not valid for ifinish > {2**30:,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
+        return        
     if i1 > 2**16:
         fill_primes(i1 + 2)
     if i0 < 2:
         i0 = 2
+    
     print(f"main() starting process with inumthreads={inumthreads}, setfractions={ary}, istart={i0}, ifinish={i1}")
     
     # inumthreads, i0, i1 = 2, 2, 32768
@@ -1543,7 +1597,12 @@ def main():
         th = [object(),] * inumthreads
         while i < i1:
             for t in range(0, inumthreads):
-                q_in.put((i + t * imult, min(i1, i + (t + 1) * imult)))
+                a = i + t * imult
+                b = i + (t + 1) * imult
+                if b >= i1:
+                    b = i1 + 2
+                # print(f"q_in.put(({a}, {b}))")
+                q_in.put((a, b))
             i += inumthreads * imult
         for t in range(0, inumthreads):
             # th[t] = threading.Thread(target=all_factors_loop, args=(q_in, q_out))
