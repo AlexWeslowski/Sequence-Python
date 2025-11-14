@@ -7,7 +7,7 @@ import os
 class Packages:
     def __init__(self):        
         self.package_list = set()
-        print(os.path.abspath(__file__))
+        #print(os.path.abspath(__file__))
         with open(os.path.abspath(__file__), 'r') as f:
             block_comment = False
             for line in f:
@@ -546,7 +546,7 @@ def calc_density1(i, a):
     global max_sum
     global total_calc_density
     if verbose: print(f"calc_density1(i={i}, a={a}), bln_count={bln_count}, bln_numba={bln_numba}")
-    if i > len(aryprimes) and i <= 2**30:
+    if i > len(aryprimes) and i <= d.size():
         fill_primes(i + 2)
     if bln_count:
         if len(a) in hsh_count_all:
@@ -956,7 +956,7 @@ def factors_loop(q_in, q_out, bbreak):
         if not bstarted:
             bstarted = True
             istarted += 1
-        if tpl[1] > len(aryprimes) and tpl[1] <= 2**30:
+        if tpl[1] > len(aryprimes) and tpl[1] <= d.size():
             fill_primes(tpl[1] + 2)
         for i in range(tpl[0], tpl[1]):
             if aryprimes[i] or (i % 2 == 0 and aryprimes[i//2]) or (i % 3 == 0 and aryprimes[i//3]):
@@ -1035,7 +1035,7 @@ def all_factors_loop(q_in, q_out):
             print(f"# all_factors_loop({tpl[0]}, {tpl[1]})")
             print("# ")
             print("# ")
-        if tpl[1] > len(aryprimes) and tpl[1] <= 2**30:
+        if tpl[1] > len(aryprimes) and tpl[1] <= d.size():
             fill_primes(tpl[1] + 2)
         for i in range(tpl[0], tpl[1]):
             if aryprimes[i]:
@@ -1510,12 +1510,12 @@ bln_keyboard_interrupt = False
 #                       268,380,000
 # 
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 2 [(1,2)] 2 65536
-# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 1145760 8388608
+# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 833280 8388608
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 6990720 16777216
 # 
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
 # python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 [(1,2)] 8388608 16777216
+# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 [(1,2)] 833280 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
@@ -1568,8 +1568,8 @@ def main():
     setfractions = frozenset([Fraction(tpl[0], tpl[1]) for tpl in ary])
     filename = f"sequence {strary}.txt"
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
-    if i1 > 2**30:
-        print(f"main() this code not valid for ifinish > {2**30:,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
+    if i1 > d.size():
+        print(f"main() this code not valid for ifinish > {d.size():,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
         return        
     if i1 > 2**16:
         fill_primes(i1 + 2)
