@@ -1332,7 +1332,7 @@ def writer(q_out):
                             s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
                             if s not in lines:
                                 lines.append(s)
-                    if ilines > 0:
+                    if len(lines) > 0:
                         _ = f_txt.writelines(lines)
                         ilines = 0
                         lines = []
@@ -1379,7 +1379,7 @@ def writer(q_out):
                             s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
                             if s not in lines:
                                 lines.append(s)
-                    if ilines > 0:
+                    if len(lines) > 0:
                         _ = f_txt.writelines(lines)
                     f_txt.flush()
                     if not bzip:
@@ -1540,7 +1540,7 @@ def main():
     global factscache
     global linescache
     
-    print(sys.version)
+    print(f"Python {sys.version}")
     cpu_info = cpuinfo.get_cpu_info()
     processor_name = cpu_info.get('brand_raw', 'Unknown Processor')
     print(processor_name)
@@ -1570,7 +1570,10 @@ def main():
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
     if i1 > d.size():
         print(f"main() this code not valid for ifinish > {d.size():,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
-        return        
+        return
+    if i0 > i1:
+        print(f"main() istart > ifinish (istart={i0:,} ifinish={i1:,})")
+        return
     if i1 > 2**16:
         fill_primes(i1 + 2)
     if i0 < 2:
