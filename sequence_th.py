@@ -1312,7 +1312,7 @@ def writer(q_out):
                     #print(f"# i0 = {i0}")
                     #print(f"# i1 = {i1}")
                     #print(f"# i1 - i0 = {i1 - i0}")
-                    print(f"# itotal = {itotal} ~ {round(itotal/dt, 1):.1f} per min")
+                    #print(f"# itotal = {itotal} ~ {round(itotal/dt, 1):.1f} per min")
                     print(f"# {round(dt, 2):.2f} mins ({round(dt/60, 2):.2f} hrs) ~ {int(round((i1 - i0)/dt, 0)):,} per min")
             else:
                 total_writer += (time.time() - twriter)
@@ -1333,7 +1333,13 @@ def writer(q_out):
                             if s not in lines:
                                 lines.append(s)
                     if len(lines) > 0:
-                        _ = f_txt.writelines(lines)
+                        try:
+                            _ = f_txt.writelines(lines)
+                        except FileNotFoundError as fnfe:
+                            print(traceback.format_exc())
+                            print(f"file is {directory}\\{filename}")
+                            print(f"len(lines) is {len(lines)}")
+                            pass
                         ilines = 0
                         lines = []
                         ifacts = 0
@@ -1380,7 +1386,13 @@ def writer(q_out):
                             if s not in lines:
                                 lines.append(s)
                     if len(lines) > 0:
-                        _ = f_txt.writelines(lines)
+                        try:
+                            _ = f_txt.writelines(lines)
+                        except OSError as ose:
+                            print(traceback.format_exc())
+                            print(f"file is {directory}\\{filename}")
+                            print(f"len(lines) is {len(lines)}")
+                            pass
                     f_txt.flush()
                     if not bzip:
                         f_txt.close()
@@ -1410,7 +1422,7 @@ def writer(q_out):
             #print(f"# i0 = {i0}")
             #print(f"# i1 = {i1}")
             #print(f"# i1 - i0 = {i1 - i0}")
-            print(f"# itotal = {itotal} ~ {int(round(itotal/(dt/60), 0)):,} per min")
+            #print(f"# itotal = {itotal} ~ {int(round(itotal/(dt/60), 0)):,} per min")
             print(f"# {round(dt/60, 2)} mins ({round(dt/60/60, 2)} hrs) ~ {round((i1 - i0)/(dt/60), 1)} per min")
 
 
@@ -1446,7 +1458,7 @@ print(f"   Absolute directory path (using pathlib.Path.resolve()): {module_direc
 print(f"   String representation: {str(module_directory_absolute)}")
 
 """
-def directory_path():
+def directory_path(filename):
     global bdata
     global bfile
     
@@ -1484,11 +1496,16 @@ def directory_path():
             sys.exit(1)
         is_readable = os.access(dir_path, os.R_OK)
         is_writable = os.access(dir_path, os.W_OK)
+        exists = True
+        if filename is not None:
+            exists = os.path.exists(f"{dir_path}\\{filename}")
         if not is_readable:
             print("Error: You do not have read permissions for this directory.")
         if not is_writable:
             print("Error: You do not have write permissions for this directory.")
-        if not is_readable or not is_writable:
+        if not exists:
+            print("Error: Path to filename does not exist.")
+        if not exists or not is_readable or not is_writable:
             sys.exit(1)
     
     print(f"Selected path '{dir_path}'")
@@ -1547,7 +1564,6 @@ def main():
     print(datetime.datetime.now().strftime("%I:%M:%S %p"))
     print("")
     args = sys.argv[1:]
-    directory = directory_path()
     
     if args[0].lower() == "debug":
         # import sqlite3
@@ -1567,6 +1583,8 @@ def main():
     strary = str(ary)[1:-1].replace("),(", ") (").replace(", ", ",")
     setfractions = frozenset([Fraction(tpl[0], tpl[1]) for tpl in ary])
     filename = f"sequence {strary}.txt"
+    directory = directory_path(filename)
+    
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
     if i1 > d.size():
         print(f"main() this code not valid for ifinish > {d.size():,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
