@@ -2,22 +2,28 @@ import subprocess
 import sys
 import re
 import os
+import warnings
 
 
 class Packages:
     def __init__(self):        
         self.package_list = set()
         #print(os.path.abspath(__file__))
-        with open(os.path.abspath(__file__), 'r') as f:
-            block_comment = False
-            for line in f:
-                if line.startswith("\"\"\""):
-                    block_comment = not block_comment
-                if not line.startswith("#") and not block_comment:
-                    if line.startswith("import "):
-                        self.add(line[7:])
-                    elif line.startswith("from "):
-                        self.add(line[5:])
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error", category=SyntaxWarning)
+            with open(os.path.abspath(__file__), 'r', encoding='utf8') as f:
+                try:
+                    block_comment = False
+                    for line in f:
+                        if line.startswith("\"\"\""):
+                            block_comment = not block_comment
+                        if not line.startswith("#") and not block_comment:
+                            if line.startswith("import "):
+                                self.add(line[7:])
+                            elif line.startswith("from "):
+                                self.add(line[5:])
+                except SyntaxWarning as sw:
+                    pass
         self.package_hash = {}
         self.package_hash["cpuinfo"] = "py-cpuinfo"
         
@@ -714,13 +720,14 @@ hsh_arrayarray = {}
 
 
 """
+
 import sys
 import os
 import threading
 import platformdirs
 import pathlib
 import importlib
-sys.path.append('C:\\Users\\alex.weslowski\\Documents\\Python\\Sequence\\github')
+sys.path.append('H:\\Documents\\Python\\Sequence\\')
 import sequence_th as seq
 import divisors as div
 import time
@@ -1184,9 +1191,11 @@ def writer(q_out):
     # if bdata:
     #     fill_hsh(fact2[0][2])
     
+    bverbose = verbose
     bfirst = True
     bfileclosed = False
     bdataclosed = False
+    hsh = {}
     conn, curs, facts, lines, data = None, None, [], [], []
     f_zip, f_buf, f_txt = None, None, None
     try:
@@ -1209,8 +1218,8 @@ def writer(q_out):
                 f_txt = open(f"{directory}\\{filename}", "a", buffering=filebuffer)
         
         i0, i1, itotal, ifacts, ilines, iwrites, icompleted = 0, 0, 0, 0, 0, 0, 0
-        if verbose:
-            print(f"writer() bfile = {bfile}, bzip = {bzip}, bdata = {bdata}")
+        if bverbose:
+            print(f"writer() bverbose = {bverbose}, bfile = {bfile}, bzip = {bzip}, bdata = {bdata}")
             print(f"writer() factscache = {factscache}, linescache = {linescache}, writescache = {writescache}")
             print(f"writer() directory = {directory}, filename = {filename}")
             print(f"writer() inumthreads = {inumthreads}, icompleted = {icompleted}")
@@ -1219,7 +1228,7 @@ def writer(q_out):
             twriter = time.time()
             if bfirst:
                 bfirst = False                
-                if verbose: 
+                if bverbose: 
                     if fact2:
                         print(f"writer() bfile = {bfile}, bdata = {bdata}, len(fact2) = {len(fact2)}, fact2[0][2] = {fact2[0][2]}, icompleted = {icompleted}")
                     else:
@@ -1233,7 +1242,7 @@ def writer(q_out):
                     print(f"{round(dt, 2)} minutes ~ {int(round((i1 - i0)/dt, 0)):,} per min")
                     break
                 else:
-                    if verbose: print(f"writer() fact2 is None")
+                    if bverbose: print(f"writer() fact2 is None")
                     continue
             if i0 == 0:
                 #print(f"i0 = {i0}, fact2 = {fact2}")
@@ -1249,10 +1258,14 @@ def writer(q_out):
             ilines += len(fact2)
             ifacts += len(fact2)
             facts.extend(fact2)
-            if verbose: print(f"writer() ilines = {ilines}")
+            if bverbose: print(f"writer() ilines = {ilines}")
             if ifacts >= factscache:
                 sfacts = sorted(facts, key=lambda f2: f2[2])
                 for f2 in sfacts[:factscache//2]:
+                    if str(f2[1]) not in hsh:
+                        hsh[str(f2[1])] = [f2[2],]
+                    else:
+                        hsh[str(f2[1])].append(f2[2])
                     print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
                     if bfile:
                         lines.append(f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n")
@@ -1265,9 +1278,10 @@ def writer(q_out):
                 facts = sfacts[factscache//2:]
             if ilines >= linescache:
                 iwrites += 1
-                if verbose: print(f"ilines = {ilines}")
-                if verbose: print(f"len(lines) = {len(lines)}")
-                if verbose: print(f"iwrites = {iwrites}")
+                if bverbose:
+                    print(f"ilines = {ilines}")
+                    print(f"len(lines) = {len(lines)}")
+                    print(f"iwrites = {iwrites}")
                 with lock:
                     # 0.16 seconds writing to file
                     # 412.05 seconds writing to database
@@ -1302,7 +1316,7 @@ def writer(q_out):
                 # 129.62 total minutes calc_density()
                 # 0.14 total minutes writing to file
                 # 0.06 total minutes writing to database
-                if verbose:
+                if bverbose:
                     print(f"# {round(total_factor_combinations/60, 2)} total minutes factorCombinations()")
                     print(f"# {round(total_factorizations_outer/60, 2)} total minutes factorizations_outer()")
                     print(f"# {round(total_calc_density/60, 2)} total minutes calc_density()")
@@ -1318,23 +1332,33 @@ def writer(q_out):
                 total_writer += (time.time() - twriter)
             q_out.task_done()
         if icompleted == inumthreads:
+            if len(facts) > 0:
+                for f2 in sorted(facts, key=lambda x: x[2]):
+                    if str(f2[1]) not in hsh:
+                        hsh[str(f2[1])] = [f2[2],]
+                    else:
+                        hsh[str(f2[1])].append(f2[2])
+                    print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
+                    s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
+                    if s not in lines:
+                        lines.append(s)
+                facts = []
+            if len(hsh) > 0:
+                for k, v in hsh.items():
+                    print(f"{k}: {v}")
+                hsh = {}
             with lock:
                 if bfile:
                     tfile = time.time()
-                    if verbose:
-                        print(f"line = {sys._getframe(0).f_lineno}, ifacts = {ifacts}")
+                    if bverbose:
+                        print(f"line = {sys._getframe(0).f_lineno}, ifact = {ifacts}")
                         print(f"line = {sys._getframe(0).f_lineno}, len(facts) = {len(facts)}")
                         print(f"line = {sys._getframe(0).f_lineno}, ilines = {ilines}")
                         print(f"line = {sys._getframe(0).f_lineno}, len(lines) = {len(lines)}")
-                    if len(facts) > 0:
-                        for f2 in sorted(facts, key=lambda x: x[2]):
-                            print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
-                            s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
-                            if s not in lines:
-                                lines.append(s)
+                        print(f"line = {sys._getframe(0).f_lineno}, len(hsh) = {len(hsh)}")
                     if len(lines) > 0:
                         try:
-                            _ = f_txt.writelines(lines)
+                            _ = f_txt.writelines(lines) 
                         except FileNotFoundError as fnfe:
                             print(traceback.format_exc())
                             print(f"file is {directory}\\{filename}")
@@ -1365,7 +1389,7 @@ def writer(q_out):
         pass
     finally:
         dt = time.time() - t0
-        if verbose:
+        if bverbose:
             print(f"icompleted = {icompleted}")
             print(f"inumthreads = {inumthreads}")
             print(f"bzip = {bzip}")
@@ -1375,16 +1399,24 @@ def writer(q_out):
             print(f"line = {sys._getframe(0).f_lineno}, len(facts) = {len(facts)}")
             print(f"line = {sys._getframe(0).f_lineno}, ilines = {ilines}")
             print(f"line = {sys._getframe(0).f_lineno}, len(lines) = {len(lines)}")
+            print(f"line = {sys._getframe(0).f_lineno}, len(hsh) = {len(hsh)}")
         if bln_keyboard_interrupt or icompleted == inumthreads:
+            if len(facts) > 0:
+                for f2 in sorted(facts, key=lambda x: x[2]):
+                    if str(f2[1]) not in hsh:
+                        hsh[str(f2[1])] = [f2[2],]
+                    else:
+                        hsh[str(f2[1])].append(f2[2])
+                    print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
+                    s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
+                    if s not in lines:
+                        lines.append(s)
+            if len(hsh) > 0:
+                for k, v in hsh.items():
+                    print(f"{k}: {v}")
             with lock:
                 if bfile and not bfileclosed:
                     tfile = time.time()
-                    if len(facts) > 0:
-                        for f2 in sorted(facts, key=lambda x: x[2]):
-                            print(f"{f2[1]}\t\t{f2[2]:,}\t\t{f2[3]}\t\t{len(f2[3])}")
-                            s = f"{f2[1]}\t{f2[2]:,}\t{f2[3]}\t{len(f2[3])}\n"
-                            if s not in lines:
-                                lines.append(s)
                     if len(lines) > 0:
                         try:
                             _ = f_txt.writelines(lines)
@@ -1423,7 +1455,7 @@ def writer(q_out):
             #print(f"# i1 = {i1}")
             #print(f"# i1 - i0 = {i1 - i0}")
             #print(f"# itotal = {itotal} ~ {int(round(itotal/(dt/60), 0)):,} per min")
-            print(f"# {round(dt/60, 2)} mins ({round(dt/60/60, 2)} hrs) ~ {round((i1 - i0)/(dt/60), 1)} per min")
+            print(f"# {round(dt/60, 2)} mins ({round(dt/60/60, 2)} hrs) ~ {int(round((i1 - i0)/(dt/60), 0)):,} per min")
 
 
 t0 = 0
@@ -1536,6 +1568,7 @@ bln_keyboard_interrupt = False
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
 # python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
+# python.exe "E:\Python\Sequence\sequence_th.py" 1 [(1,2)] 2 1048576
 # 
 def main():
     global verbose
