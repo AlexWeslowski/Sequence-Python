@@ -96,7 +96,7 @@ import multiprocessing, math, numpy, sparse, itertools, functools, operator, pri
 import numba, numba.experimental, numba.extending, numba.typed, numba.types
 import sympy, sympy.external.gmpy
 from multiprocessing import Process
-import divisors as d
+import divisors as div
 
 MAX_RECURSION = 8
 bln_cpp = True
@@ -352,72 +352,6 @@ def calc_density_numba(i, a, max_sum):
     return frac
     
 
-"""
-import fractions
-import sys
-import os
-import threading
-import platformdirs
-import pathlib
-import importlib
-sys.path.append('H:\\Documents\\Python\\Sequence\\github')
-sys.path.append('C:\\Users\\alex.weslowski\\Documents\\Python\\Sequence\\github')
-import sequence_th as seq
-from sequence_threads import Int128
-import divisors as div
-import time
-
-seq.fill_primes(2**21)
-i = 1048578
-c = div.Combinations(i)
-c.backtrack(i, [])
-c.removeAt(3)
-list(seq.factorizations_outer(i, bln_remove_gt_half=False))
-
-numbat1 = 0
-numbat2 = 0
-for i in range(2**20, 2**20 + 2**18 + 1):
-    t1 = time.time()
-    ary1 = [seq.calc_density_numba(i, f1, seq.max_sum) for f1 in seq.factorizations_outer(i, bln_remove_gt_half=False)]
-    numbat1 += time.time() - t1
-    t2 = time.time()
-    ary2 = [seq.calc_density_numba2(i, f1, seq.max_sum) for f1 in seq.factorizations_outer(i, bln_remove_gt_half=False)]
-    numbat2 += time.time() - t2
-    ary1n = [x.numerator for x in ary1]
-    ary2n = [x.numerator for x in ary2]
-    ary1d = [x.denominator for x in ary1]
-    ary2d = [x.denominator for x in ary2]
-    if ary1n != ary2n or ary1d != ary2d:
-        break
-
-Fraction(1, a[2]) - Fraction(1, mult_numba((a[0], a[2]))) - Fraction(1, mult_numba((a[1], a[2]))) + Fraction(1, mult_numba(a[0:3]))
-a = [2, 3, 174763]
-b = seq.mult_numba((a[0], a[2]))
-c = seq.mult_numba((a[1], a[2]))
-d = seq.mult_numba(a[0:3])
-a128 = Int128(a[2])
-b128 = Int128(b)
-c128 = Int128(c)
-d128 = Int128(d)
-seq.Fraction(a128*b128*c128 - a128*b128*d128 - a128*c128*d128 + b128*c128*d128, a128*b128*c128*d128)
-seq.Fraction(a[2]*b*c - a[2]*b*d - a[2]*c*d + b*c*d, a[2]*b*c*d)
-
-# 64051561204955364
-a[2]*b*c - a[2]*b*d - a[2]*c*d + b*c*d
-num = a128*b128*c128 - a128*b128*d128 - a128*c128*d128 + b128*c128*d128
-numpy.int64(num.limbs[0]) + (numpy.int64(num.limbs[1]) << 31) + (num.limbs[2] << 62) + (num.limbs[3] << 93)
-int(a128*b128*c128 - a128*b128*d128 - a128*c128*d128 + b128*c128*d128)
-
-# 33581528972584842836196 # 2**74.83
-a[2]*b*c*d
-int(a128*b128*c128*d128)
-den = a128*b128*c128*d128
-int(den.limbs[0]) + (int(den.limbs[1]) << 31) + (int(den.limbs[2]) << 62) + (int(den.limbs[3]) << 93)
-
-fractions.Fraction(64051561204955364, 33581528972584842836196)
-Fraction(1, 524289)
-
-"""
 @numba.jit(nopython=True)
 def calc_density_numba2(i, a, max_sum):
     bcheckmax = False
@@ -552,7 +486,7 @@ def calc_density1(i, a):
     global max_sum
     global total_calc_density
     if verbose: print(f"calc_density1(i={i}, a={a}), bln_count={bln_count}, bln_numba={bln_numba}")
-    if i > len(aryprimes) and i <= d.size():
+    if i > len(aryprimes) and i <= div.size():
         fill_primes(i + 2)
     if bln_count:
         if len(a) in hsh_count_all:
@@ -655,8 +589,8 @@ def to_array(aa):
 
 
 #div = Divisors(aryprimes)
-div = d.Divisors.get_instance()
-div.set_verbose(False)
+#div = d.Divisors.get_instance()
+#div.set_verbose(False)
 
 #@numba.jit(nopython=True)
 def backtrack_divisors(n, target, factors, combinations, div):
@@ -718,132 +652,12 @@ def backtrack_sympy_divisors(n, target, factors, combinations):
 bln_backtrack_init = False
 hsh_arrayarray = {}
 
-
-"""
-
-import sys
-import os
-import threading
-import platformdirs
-import pathlib
-import importlib
-sys.path.append('H:\\Documents\\Python\\Sequence\\')
-import sequence_th as seq
-import divisors as div
-import time
-# hshfractions = [-3550055125485641917]
-hshfractions = [hash(frac) for frac in seq.setfractions]
-
-bverbose = False
-seq.min_factors = 2
-seq.max_factors = 10
-seq.max_denominator = 3
-seq.bfile = True
-seq.bdata = False
-seq.verbose = bverbose
-div.set_verbose(bverbose)
-seq.filename = "sequence 1,2 1,3.txt"
-seq.filename = "sequence 1_2.txt"
-seq.directory = seq.directory_path()
-
-
-i = 12
-i = 65536
-[fact for fact in seq.factorizations_outer(i, bln_remove_gt_half=False)]
-
-i = 17149440
-fact2 = []
-for f1 in seq.factorizations_outer(i, bln_remove_gt_half=False):
-    print(f"f1 = {f1}")
-    frac1 = seq.calc_density1(i, f1)
-    print(f"frac1 = {frac1}")
-    if frac1.denominator <= seq.max_denominator:
-        fact2.append((frac1.denominator, frac1, i, [int(x) for x in f1]))
-
-
-frac1 = seq.calc_density1(17149440, [5, 6, 7, 11, 29, 256])
-frac1 in seq.setfractions
-hash(frac1) in [hash(frac) for frac in seq.setfractions]
-
-print(seq.bln_count)
-print(seq.bln_numba)
-a = [3, 7, 816640]
-frac1 = seq.calc_density1(17149440, a)
-frac1 = seq.calc_density1(39443712, [3, 7, 11, 46, 58, 64])
-
-bbreak = False
-for i in range(0, 20):
-    for j in [17149440, 39443712, 39621120]:
-        fact2 = []
-        for f1 in seq.factorizations_outer(j, bln_remove_gt_half=False):
-            try:
-                frac1 = seq.calc_density1(j, f1)
-                if frac1.denominator == 2: print(f"f1 = {f1}, frac1 = {frac1}")
-                if hash(frac1) in hshfractions:
-                    fact2.append((frac1.denominator, frac1, j, [int(x) for x in f1]))
-            except Exception as ex:
-                pass
-        print(fact2)
-        if len(fact2) == 0:
-            bbreak = True
-            break
-    if bbreak:
-        break
-
-f1 = [3, 5, 11, 103936]
-frac1 = seq.Fraction(27773, 53592)
-
-seq.q_in.put((2, 8388608))
-seq.q_in.put((2, 16384))
-seq.q_in.put((16777216, ))
-loop = threading.Thread(target=seq.all_factors_loop)
-seq.t0 = time.time()
-loop.start()
-seq.q_in.put(None)
-writer = threading.Thread(target=seq.writer)
-writer.start()
-loop.join()
-writer.join()
-
-seq.min_factors = 2
-seq.max_factors = 10
-seq.bfile = True
-seq.bdata = False
-seq.verbose = True
-seq.filename = "sequence 1_2.txt"
-seq.directory = seq.directory_path()
-seq.q_in.put((13440, 14882))
-seq.q_in.put((549120, 591362))
-seq.q_in.put((39443712, 39443712 + 2))
-seq.q_in.put((39621120, 39621120 + 2))
-loop = threading.Thread(target=seq.factors_loop, args=(seq.q_in, seq.q_out, False))
-seq.t0 = time.time()
-loop.start()
-seq.q_in.put(None)
-writer = threading.Thread(target=seq.writer)
-writer.start()
-loop.join()
-writer.join()
-
-seq.verbose = False
-seq.q_in.put((2, 32768))
-loop = threading.Thread(target=seq.factors_loop, args=(False,))
-seq.t0 = time.time()
-loop.start()
-seq.q_in.put(None)
-writer = threading.Thread(target=seq.writer)
-writer.start()
-loop.join()
-writer.join()
-
-"""
-
 #factors = [1,]
 #combinations = ArrayArray(2048, True)
-#sequence.backtrack_divisors(3293136, 3293136, factors, combinations)
-#combinations = sequence.ArrayArray(1024, True)
+#sequence_th.backtrack_divisors(3293136, 3293136, factors, combinations)
+#combinations = sequence_th.ArrayArray(1024, True)
 #combinations.append([2, 3])
-#sequence.factorCombinations(3293136).to_array()
+#sequence_th.factorCombinations(3293136).to_array()
 def factorCombinations(n2):
     global verbose
     global bln_cpp
@@ -866,7 +680,7 @@ def factorCombinations(n2):
     factors = [1,]
     combinations = ArrayArray(2048, True)
     if bln_cpp:
-        combinations = d.Combinations(n)
+        combinations = div.Combinations(n)
         combinations.backtrack(n2, [])
         #combinations = combinations.get_arrayarray()
     elif bln_numba:
@@ -883,10 +697,10 @@ def factorCombinations(n2):
     return combinations
 
 
-#ary_tpl = sequence.factorCombinations(3293136)
+#ary_tpl = sequence_th.factorCombinations(3293136)
 #[ary_tpl[at] for at in range(0, len(ary_tpl))]
-#sequence.to_array(sequence.factorizations_outer(3293136))
-#frozenset([tuple(ary) for ary in sequence.factorizations_outer(3293136, bln_remove_gt_half=False).to_array()])
+#sequence_th.to_array(sequence_th.factorizations_outer(3293136))
+#frozenset([tuple(ary) for ary in sequence_th.factorizations_outer(3293136, bln_remove_gt_half=False).to_array()])
 #sequence.factorizations_outer(3293136)
 def factorizations_outer(n, bln_remove_gt_half=True):
     global min_factors
@@ -931,8 +745,9 @@ def factorizations_outer(n, bln_remove_gt_half=True):
                 if verbose: print(f"removing ary_tpl[{at}] = {ary_tpl[at]}")
                 #ary_tpl.remove(ary_tpl[at]) 
                 ary_tpl.removeAt(at)
-                # at -= 1
+                #at -= 1
                 break
+            prev_t = this_t
     total_factorizations_outer += (time.time() - tfactorizations)
     if verbose: print(f"factorizations_outer({n}) returning len(ary_tpl) = {len(ary_tpl)}")
     return ary_tpl
@@ -963,7 +778,7 @@ def factors_loop(q_in, q_out, bbreak):
         if not bstarted:
             bstarted = True
             istarted += 1
-        if tpl[1] > len(aryprimes) and tpl[1] <= d.size():
+        if tpl[1] > len(aryprimes) and tpl[1] <= div.size():
             fill_primes(tpl[1] + 2)
         for i in range(tpl[0], tpl[1]):
             if aryprimes[i] or (i % 2 == 0 and aryprimes[i//2]) or (i % 3 == 0 and aryprimes[i//3]):
@@ -979,6 +794,11 @@ def factors_loop(q_in, q_out, bbreak):
                     print(f"factors_loop() f1 = {[int(x) for x in f1]}")
                     print(f"factors_loop() ({hash(frac1)} in hshfractions) ? {hash(frac1) in hshfractions}")
                 if hash(frac1) in hshfractions:
+                    #bln = False
+                    #for frac2 in setfractions:
+                    #    if frac1.denominator == frac2.denominator and frac1.numerator == frac2.numerator:
+                    #        bln = True
+                    #if bln:
                     fact2.append((frac1.denominator, frac1, i, [int(x) for x in f1]))
                     if verbose: print(f"factors_loop() fact2[-1] = {fact2[-1]}")
                     if bbreak:
@@ -1042,7 +862,7 @@ def all_factors_loop(q_in, q_out):
             print(f"# all_factors_loop({tpl[0]}, {tpl[1]})")
             print("# ")
             print("# ")
-        if tpl[1] > len(aryprimes) and tpl[1] <= d.size():
+        if tpl[1] > len(aryprimes) and tpl[1] <= div.size():
             fill_primes(tpl[1] + 2)
         for i in range(tpl[0], tpl[1]):
             if aryprimes[i]:
@@ -1068,8 +888,8 @@ def all_factors_loop(q_in, q_out):
         if verbose: print(f"all_factors_loop() i = {i}, lineno = {sys._getframe(0).f_lineno}")
 
 
-# sequence.ary_factors_loop([3293136,])
-# [sequence.calc_density(3293136, ary) for ary in sequence.factorizations_outer(3293136, bln_remove_gt_half=False).to_array()]
+# sequence_th.ary_factors_loop([3293136,])
+# [sequence_th.calc_density(3293136, ary) for ary in sequence.factorizations_outer(3293136, bln_remove_gt_half=False).to_array()]
 def ary_factors_loop(ary):
     global aryprimes
     for i in ary:
@@ -1368,6 +1188,7 @@ def writer(q_out):
                         lines = []
                         ifacts = 0
                         facts = []
+                    _ = f_txt.write("\n") 
                     f_txt.flush()
                     if not bzip:
                         f_txt.close()
@@ -1425,6 +1246,7 @@ def writer(q_out):
                             print(f"file is {directory}\\{filename}")
                             print(f"len(lines) is {len(lines)}")
                             pass
+                    _ = f_txt.write("\n") 
                     f_txt.flush()
                     if not bzip:
                         f_txt.close()
@@ -1471,25 +1293,6 @@ q_in = queue.Queue()
 q_out = queue.Queue()
 lock = threading.Lock()
 
-
-"""
-import os
-from pathlib import Path
-
-current_file_path_str = __file__
-print(f"1. Path to the current file (__file__): {current_file_path_str}")
-
-module_directory_os = os.path.abspath(os.path.dirname(__file__))
-print(f"\n2. Directory of the module (using os): {module_directory_os}")
-
-current_path_obj = Path(__file__)
-module_directory_pathlib = current_path_obj.parent
-module_directory_absolute = module_directory_pathlib.resolve()
-print(f"\n3. Directory of the module (using pathlib.Path): {module_directory_pathlib}")
-print(f"   Absolute directory path (using pathlib.Path.resolve()): {module_directory_absolute}")
-print(f"   String representation: {str(module_directory_absolute)}")
-
-"""
 def directory_path(filename):
     global bdata
     global bfile
@@ -1511,6 +1314,7 @@ def directory_path(filename):
     for key in hsh_dir.keys():
         if choice == str(key[0]):
             dir_path = hsh_dir[key]
+    
     if dir_path == "":
         if choice == '6':
             dir_path_str = input("Enter the directory path: ")
@@ -1531,6 +1335,10 @@ def directory_path(filename):
         exists = True
         if filename is not None:
             exists = os.path.exists(f"{dir_path}\\{filename}")
+            if not exists:
+                with open(f"{dir_path}\\{filename}", "x") as f:
+                    f.write("")
+                exists = os.path.exists(f"{dir_path}\\{filename}")
         if not is_readable:
             print("Error: You do not have read permissions for this directory.")
         if not is_writable:
@@ -1538,13 +1346,14 @@ def directory_path(filename):
         if not exists:
             print("Error: Path to filename does not exist.")
         if not exists or not is_readable or not is_writable:
-            sys.exit(1)
+            sys.exit(1)    
+        print(f"Selected path '{dir_path}'")
+        print("")
     
-    print(f"Selected path '{dir_path}'")
-    print("")
     return dir_path
 
 
+bln_factors_loop = False
 bln_all_factors_loop = False
 bln_writer = False
 bln_keyboard_interrupt = False
@@ -1554,21 +1363,14 @@ bln_keyboard_interrupt = False
 # main loop 
 # 
 # i7-1165G7 @ 2.80GHz #   1,145,760 #  14.22 mins (0.24 hrs) 67,117 per min
-# i7-1165G7 @ 2.80GHz #   8,388,608 
+# i7-1165G7 @ 2.80GHz #   1,048,576 #  12.40 mins (0.21 hrs) 76,968 per min
+# i7-1165G7 @ 2.80GHz #   8,388,608 # 335.85 mins (5.60 hrs) 24,102 per min
 #                         8,388,608 # 139.40 mins (2.30 hrs)
 #                       268,380,000
 # 
-# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 2 [(1,2)] 2 65536
-# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 833280 8388608
-# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 1 [(1,2)] 6990720 16777216
-# 
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 [(1,2)] 2 65536
-# python.exe "H:\Documents\Python\Sequence\github\sequence_th.py" 8 [(1,2)] 2 8388608
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\sequence_th.py" 2 [(1,2)] 833280 16777216
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 2 2 39410944 39653888
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 8388608 16777216
-# python.exe "C:\Users\alex.weslowski\Documents\Python\Sequence\github\sequence_th.py" 4 2 2 268380000
 # python.exe "E:\Python\Sequence\sequence_th.py" 1 [(1,2)] 2 1048576
+# python.exe "E:\Python\Sequence\sequence_th.py" 1 [(1,2)] 2 8388608
+# python.exe "E:\Python\Sequence\sequence_th.py" 1 [(1,2)] 8388608 16777216
 # 
 def main():
     global verbose
@@ -1594,7 +1396,6 @@ def main():
     cpu_info = cpuinfo.get_cpu_info()
     processor_name = cpu_info.get('brand_raw', 'Unknown Processor')
     print(processor_name)
-    print(datetime.datetime.now().strftime("%I:%M:%S %p"))
     print("")
     args = sys.argv[1:]
     
@@ -1619,8 +1420,8 @@ def main():
     directory = directory_path(filename)
     
     i0, i1 = int(args[2]) - inumthreads * imult, int(args[3])
-    if i1 > d.size():
-        print(f"main() this code not valid for ifinish > {d.size():,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
+    if i1 > div.size():
+        print(f"main() this code not valid for ifinish > {div.size():,} ifinish={i1} (2**{round(math.log(ifinish, 2), 2):.2f})")
         return
     if i0 > i1:
         print(f"main() istart > ifinish (istart={i0:,} ifinish={i1:,})")
@@ -1631,7 +1432,8 @@ def main():
         i0 = 2
     
     print(f"main() starting process with inumthreads={inumthreads}, setfractions={ary}, istart={i0}, ifinish={i1}")
-    
+    print(f"main() {datetime.datetime.now().strftime('%I:%M:%S %p')}")
+
     # inumthreads, i0, i1 = 2, 2, 32768
     # i, imult = i0, 8192
     # while i < i1:
